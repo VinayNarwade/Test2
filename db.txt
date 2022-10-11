@@ -1,0 +1,456 @@
+mysql -u 1RV21MC044 -h 172.16.34.35 -p
+create table musician(ssn varchar(20) primary key, name varchar(50) not null, address varchar(100), ph_no bigint(13));
+create table instrument(i_id varchar(20) primary key, name varchar(50) not null, m_key varchar(100));
+create table album(u_id varchar(20) primary key, title varchar(50) not null, copywrite varchar(100), format varchar(50),ssn varchar(20),foreign key(ssn) references musician(ssn));
+create table song(s_id varchar(20) primary key, title varchar(50) not null, author varchar(50),u_id varchar(20),foreign key(u_id) references album(u_id));
+create table musician_instrument(ssn varchar(20), i_id varchar(20),foreign key(ssn) references musician(ssn), foreign key(i_id) references instrument(i_id), primary key(ssn,i_id));
+create table musician_song(ssn varchar(20), s_id varchar(20),foreign key(ssn) references musician(ssn), foreign key(s_id) references song(s_id), primary key(ssn,s_id));
+desc musician;
+desc instrument;
+desc album;	
+desc song;
+desc musician_instrument;
+desc musician_song;
+
+
+select * from musician;
+select * from instrument;
+select * from album;
+select * from song;
+select * from musician_instrument;
+select * from musician_song;
+
+
+
+
+
+insert into musician values("m1","jay","kolkata",9655446677);
+insert into musician values("m2","gokul","tumkur",9655454577);
+insert into musician values("m3","ravi","delhi",9655543477);
+insert into musician values("m4","indra","belgavi",9645674677);
+insert into musician values("m5","vipul","kolkata",9653457677);
+
+
+
+
+insert into instrument values("i1","keyboard","c");
+insert into instrument values("i2","guitar","b-flat");
+insert into instrument values("i3","flute","e-flat");
+insert into instrument values("i4","drums","c");
+insert into instrument values("i5","piano","e-flat");
+
+
+
+insert into album values("a1","Tiger","t-series","cd","m1");
+insert into album values("a2","echos","jio","mc","m2");
+insert into album values("a3","trains","shemaru","cd","m3");
+insert into album values("a4","locals","red chilis","cd","m4");
+insert into album values("a5","cypher","t-series","mc","m1");
+
+
+
+insert into song values("s1","thunder","jay","a1");
+insert into song values("s2","blow","gokul","a2");
+insert into song values("s3","level","jay","a3");
+insert into song values("s4","shape","indra","a2");
+insert into song values("s5","happier","ravi","a5");
+
+
+
+
+insert into musician_instrument values("m1","i1");
+insert into musician_instrument values("m2","i1");
+insert into musician_instrument values("m3","i1");
+insert into musician_instrument values("m1","i2");
+insert into musician_instrument values("m4","i2");
+insert into musician_instrument values("m5","i2");
+insert into musician_instrument values("m1","i3");
+insert into musician_instrument values("m3","i4");
+insert into musician_instrument values("m5","i5");
+insert into musician_instrument values("m1","i4");
+insert into musician_instrument values("m1","i5");
+
+
+
+
+insert into musician_song values("m1","s1");
+insert into musician_song values("m1","s2");
+insert into musician_song values("m1","s3");
+insert into musician_song values("m2","s1");
+insert into musician_song values("m2","s4");
+insert into musician_song values("m3","s1");
+insert into musician_song values("m3","s5");
+insert into musician_song values("m4","s1");
+insert into musician_song values("m4","s3");
+
+
+
+
+
+select m.name as Musician, s.title as Song, a.title as Album
+from musician m, song s,album a, musician_song ms
+where m.ssn = ms.ssn
+and s.s_id = ms.s_id
+and s.u_id = a.u_id;
+
+
+
+
+
+select m.name
+from musician m
+where m.ssn not in 
+(select m.ssn from musician m, album a
+where a.ssn=m.ssn);
+
+
+
+
+
+
+
+select s.* 
+from song s,musician_song ms
+where s.s_id=ms.s_id
+group by ms.s_id
+having count(ms.s_id)>3;
+
+
+
+
+
+select count(mi.i_id) as Number_of_Musicians,
+i.name as Instrument,
+count(mi.i_id)/(select count(*) from musician) as Average
+from musician_instrument mi, instrument i
+where mi.i_id=i.i_id
+group by mi.i_id;
+
+
+
+mysql> alter table album add column no_songs int(3);
+
+mysql> update album set no_songs = where u_id = 'a1';
+
+
+mysql> select distinct(a.title), no_songs from album a, musician_instrument mi, instrument i, musician m 
+where
+no_songs>(select avg(no_songs) from album)
+and mi.ssn = m.ssn and mi.i_id = i.i_id
+and mi.ssn in (select ssn from album where i.name in("flute","guitar"));
+
+
+
+
+select m.* 
+from musician m, musician_instrument mi
+where mi.ssn = m.ssn
+group by mi.ssn 
+having count(mi.ssn) = (select count(*) from instrument);
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+create table doctor(dssn varchar(10) primary key,dname varchar(15),speciality varchar(15),Experience int(3));
+
+create table patient(pssn varchar(10) primary key, pname varchar(10),paddress varchar(20),age int(3));
+
+create table pharma_co(pcname varchar(15) primary key,pcaddr varchar(10),pcphone bigint(10));
+
+create table drug(tradename varchar(20) primary key,formula varchar(12),pcname varchar(15),foreign key(pcname) references pharma_co(pcname));
+
+create table pharmacy(phname varchar(15) primary key,phaddr varchar(13),phphone bigint(10));
+
+create table sell(phname varchar(15),tradename varchar(20),price int(4),foreign key(phname) references pharmacy(phname),foreign key(tradename) references drug(tradename),primary key(phname,tradename));
+
+create table checks(dssn varchar(10),pssn varchar(10),foreign key(dssn) references doctor(dssn),foreign key(pssn) references patient(pssn),primary key(dssn,pssn));
+
+create table prescribe(dssn varchar(10),pssn varchar(10),tradename varchar(20),
+    date date,quantity int(3),
+    foreign key(dssn) references doctor(dssn),
+    foreign key(pssn) references patient(pssn),
+    foreign key(tradename) references drug(tradename),
+    primary key(dssn,pssn,tradename));
+
+create table contract(pcname varchar(15),phname varchar(15),sdate date,ldate date,supervisor varchar(15),text varchar(15),foreign key(pcname) references pharma_co(pcname),
+foreign key(phname) references pharmacy(phname),primary key(pcname,phname));
+
+
+insert(doctor)
+
+insert into doctor values('dr01','Ramesh','opthalmologist',5);
+insert into doctor values('dr02','Rajesh','neurologist',7);
+insert into doctor values('dr03','Manoj','pediatrician',4);
+insert into doctor values('dr04','Anshuman','dermatologist',3);
+insert into doctor values('dr05','Monisha','cardiologist',3);
+insert into doctor values('dr06','ketaki','dentist',5);
+
+insert(patient)
+
+insert into patient values('pa01','Radha','Dharwad',20);
+insert into patient values('pa02','Krishna','Hubli',20);
+insert into patient values('pa03','Peter','Mysore',22);
+insert into patient values('pa04','Rahim','Kalburgi',30);
+insert into patient values('pa05','Rachel','Delhi',32);
+
+insert(pharma_co)
+insert into pharma_co values('Cipla','mumbai',9874561230);
+insert into pharma_co values('Juggat Pharma','bangalore',8123456789);
+insert into pharma_co values('Sun Pharma','Delhi',7123456789);
+insert into pharma_co values('Reddys lab','Hyderabad',6123456789);
+insert into pharma_co values('Eli Lilly','Chennai',7323456789);
+
+insert(drug)
+
+insert into drug values('dolo650','formula1','Cipla');
+insert into drug values('Lantus','formula2','Cipla');
+insert into drug values('Tusq','formula2','Cipla');
+insert into drug values('Xanax','formula2','Cipla');
+insert into drug values('mixtard','formula3','Cipla');
+insert into drug values('janumet','formula3','Cipla');
+insert into drug values('clavam','formula4','Cipla');
+insert into drug values('duphaston','formula4','Cipla');
+insert into drug values('thyronorm','formula5','Cipla');
+insert into drug values('Augmentin','formula6','Sun Pharma');
+insert into drug values('Galvus Met','formula6','Reddys lab');
+insert into drug values('Glycomet','formula6','Eli Lilly');
+insert into drug values('Botroclot','formula6','Juggat Pharma');
+
+
+insert(pharmacy)
+
+insert into pharmacy values('medplus','mumbai',9879874564);
+insert into pharmacy values('medplus2','mumbai',9879874561);
+insert into pharmacy values('medplus3','mumbai',9879874562);
+insert into pharmacy values('medplus4','mumbai',9879874563);
+insert into pharmacy values('medplus5','mumbai',9879874544);
+insert into pharmacy values('medplus6','mumbai',9879874565);
+insert into pharmacy values('medplus7','mumbai',9879874566);
+insert into pharmacy values('appolo1','mumbai',9879874523);
+insert into pharmacy values('appolo2','mumbai',9879874525);
+insert into pharmacy values('appolo3','mumbai',9879874527);
+insert into pharmacy values('appolo4','Bangalore',9879874527);
+insert into pharmacy values('medlife','Bangalore',9879874527);
+insert into pharmacy values('medlife2','chennai',9879874527);
+insert into pharmacy values('netmeds','chennai',9879874527);
+insert into pharmacy values('practo','hyderabad',9879874527);
+insert into pharmacy values('pharmeasy','Delhi',9879874527);
+
+insert(sells)
+
+insert into sell values('appolo1','clavam',120);
+insert into sell values('appolo2','clavam',140);
+insert into sell values('medplus2','janumet',130);
+insert into sell values('medplus3','mixtard',100);
+insert into sell values('medplus4','tusq',120);
+insert into sell values('medplus5','xanax',120);
+insert into sell values('medplus6','xanax',140);
+insert into sell values('medplus7','thyronorm',140);
+insert into sell values('medplus7','xanax',160);
+insert into sell values('appolo2','xanax',160);
+insert into sell values('netmeds','Lantus',200);
+insert into sell values('appolo1','dolo650',100);
+insert into sell values('appolo2','dolo650',100);
+insert into sell values('appolo3','dolo650',100);
+insert into sell values('appolo4','dolo650',100);
+insert into sell values('medlife','dolo650',100);
+insert into sell values('medlife2','dolo650',100);
+insert into sell values('medplus','dolo650',100);
+insert into sell values('medplus2','dolo650',100);
+insert into sell values('medplus3','dolo650',100);
+insert into sell values('medplus4','dolo650',100);
+insert into sell values('medplus5','dolo650',100);
+insert into sell values('medplus6','dolo650',100);
+insert into sell values('medplus7','dolo650',100);
+insert into sell values('netmeds','dolo650',100);
+insert into sell values('pharmeasy','dolo650',100);
+insert into sell values('practo','dolo650',100);
+
+insert(checks)
+
+insert into checks values('dr01','pa01');
+insert into checks values('dr01','pa02');
+insert into checks values('dr01','pa03');
+insert into checks values('dr01','pa04');
+insert into checks values('dr01','pa05');
+insert into checks values('dr02','pa02');
+insert into checks values('dr03','pa03');
+insert into checks values('dr04','pa04');
+insert into checks values('dr05','pa05');
+
+
+
+
+insert (prescribe)
+
+insert into prescribe values('dr01','pa01','clavam','2013-01-01',2);
+insert into prescribe values('dr01','pa02','dolo650','2013-01-02',5);
+insert into prescribe values('dr01','pa03','Lantus','2013-01-03',3);
+insert into prescribe values('dr01','pa04','duphaston','2013-01-04',7);
+insert into prescribe values('dr01','pa05','Glycomet','2013-01-04',6);
+insert into prescribe values('dr02','pa02','Augmentin','2014-01-04',6);
+insert into prescribe values('dr03','pa03','Botroclot','2015-01-04',6);
+insert into prescribe values('dr04','pa04','Tusq','2016-01-04',4);
+insert into prescribe values('dr05','pa05','Xanax','2017-01-04',8);
+
+insert (contract)
+
+insert into contract values('Cipla','appolo1','2013-01-01','2015-01-01','sup1','text1');
+insert into contract values('Eli Lilly','medlife','2013-08-01','2015-06-01','sup2','text2');
+insert into contract values('Sun Pharma','medplus','2015-08-01','2017-06-01','sup3','text3');
+insert into contract values('Reddys lab','netmeds','2015-07-01','2018-06-01','sup4','text4');
+insert into contract values('Juggat Pharma','practo','2017-07-01','2018-06-01','sup5','text5');
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+create table panel(pv int(20) primary key, type varchar(40), capacity varchar(40),warrenty int(20),price int(10));
+
+insert into panel values(001,"Monocrytlline","1",15,15000);
+insert into panel values(002,"Monocrytlline","5",25,25000);
+insert into panel values(003,"Polycystalline","8",15,25000);
+insert into panel values(004,"Monocrytlline","9",25,30000);
+insert into panel values(005,"Polycystalline","15",15,45000);
+
+
+
+create table vendor(tin int(20) primary key, name varchar(40),vaddr varchar(40), contact bigint);
+
+
+insert into vendor values(110,"Ravi","Banglore",9546862364);
+insert into vendor values(111,"Gokul","Tumkur",6373456424);
+insert into vendor values(113,"Deep","Kolkata",9546265678);
+insert into vendor values(114,"Jay","Mysore",9874862326);
+insert into vendor values(115,"Sai","Mumbai",8246435345);
+
+
+create table user(houseno varchar(15), uaddr varchar(40),usage varchar(40));
+
+
+insert into user values("151","Banglore","comercial");
+insert into user values("152","Mumbai","domestic");
+insert into user values("153","Mumbai","comercial");
+insert into user values("164","Mysore","domestic");
+insert into user values("175","Kolkata","domestic");
+
+CREATE TABLE sell(pv int(20),FOREIGN KEY(pv) REFERENCES panel(pv),tin int(20),FOREIGN KEY(tin) REFERENCES vendor(tin),PRIMARY KEY(pv,tin));
+
+insert into sell values(001,111);
+insert into sell values(002,110);
+insert into sell values(003,113);
+insert into sell values(004,114);
+insert into sell values(005,115);
+
+
+CREATE TABLE installed(idate DATE,iprice INT,pv int(20),FOREIGN KEY(pv) REFERENCES panel(pv),houseno varchar(15),FOREIGN KEY(houseno) REFERENCES user(houseno),tin int(20),FOREIGN KEY(tin) REFERENCES vendor(tin),PRIMARY KEY(pv,houseno,tin));
+
+insert into installed values("2020-1-10",40000,001,151,111);
+insert into installed values("2020-2-7",40000,002,152,110);
+insert into installed values("2021-1-2",60000,003,153,113);
+insert into installed values("2021-1-22",40000,004,164,114);
+insert into installed values("2019-12-7",60000,005,175,115);
+
+
+
+
+
+
+CREATE TABLE purchased(pv int(20) ,FOREIGN KEY(pv) REFERENCES panel(pv),houseno varchar(15) ,FOREIGN KEY(houseno) REFERENCES user(houseno),PRIMARY KEY(pv,houseno));
+
+
+insert into purchased values(001,151);
+insert into purchased values(002,152);
+insert into purchased values(003,153);
+insert into purchased values(004,164);
+insert into purchased values(005,175);
+
+
+
+
+
+
+
+
+
+1. select v.*, count(v.tin) from vendor v, installed i, user u where u.houseno=i.houseno and i.tin=v.tin and u.usages="domestic" group by
+v.tin order by count(v.tin);
+
+
+1) select v.*, count(v.tin) from vendor v, installed i, user u where u.houseno=i.houseno and i.tin=v.tin and u.usages="domestic" group by
+v.tin having count(v.tin)>=ALL(select count(v.tin) from vendor v, installed i, user u where u.houseno=i.houseno and i.tin=v.tin and u.usages="domestic" group by v.tin);
+
+
+2. select u.houseno,u.uaddr,p.capacity from user u, installed i, panel p where u.houseno=i.houseno and p.pv=i.pv and p.capacity=(select max(capacity) from panel);
+
+3. select u.uaddr from user u, panel p, installed i where u.houseno=i.houseno and p.pv=i.pv and p.type="Monocrytlline";
+
+4.select u.uaddr,sum(i.price) from user u, installed i where u.houseno=i.houseno group by(i.addr);
+
+5. select v.*, p.*, i.idate from vendor v, panel p, installed i where v.tin=i.tin and p.pv=i.pv and i.idate in (select min(idate) from installed);
+
+6.select v.type, avg(v.iprice) from (select i.*,p.capacity,u.uaddr,p.type from installed i inner join panel p on i.pv=p.pv inner join user u on u.houseno = i.houseno where a.type = "commercial") as v group by v.type;
+
+
+6)select v.type, avg(v.iprice) from (select i.*,p.capacity,u.uaddr,p.type from installed i inner join panel p on i.pv=p.pv inner join user u on u.houseno = i.houseno where u.usages = "comercial") as v group by v.type; 
+
+
+
