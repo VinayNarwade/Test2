@@ -1,0 +1,33 @@
+Q1
+select m.name as Musician, s.name as Song, a.name as Album
+ from musician m, song s, album a, perform p
+ where m.SSN = p.SSN and s.Aid = a.Aid and p.Sid = s.Sid order by a.name;
+
+Q2
+select m.name from musician m where m.SSN not in 
+(select m.SSN from musician m, album a where m.SSN = a.SSN);
+
+Q3
+select s.* from song s where s.Sid in 
+(select p.Sid from perform p group by (p.Sid) having count(p.Sid)>=3);
+
+Q4
+select i.name , count(p.Iid), count(p.Iid)/(select count(*) from musician)
+ from instrument i, play p where
+ p.Iid = i.Iid group by p.Iid having count(p.Iid);
+
+Q5
+alter table album add(no_of_songs int(3));
+
+update album set no_of_songs=’3’ where Aid=’1’;
+
+select m.name as Musician, a.name as Album from album a, play p, musician m
+where no_of_songs > (select avg(no_of_songs) from album)
+ and a.SSN=m.SSN and m.SSN = p.SSN and p.SSN in
+(select p.SSN from play where p.Iid = "1") and
+p.SSN in (select pa.SSN from play pa where pa.Iid="3");
+
+Q6
+select m.* from musician m where M.SSN in 
+(select SSN from play group by SSN having count(Iid) = 
+(select count(Iid) from instrument));
