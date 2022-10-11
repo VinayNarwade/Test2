@@ -1,0 +1,71 @@
+create table panel(PV int(20) primary key, TYPE varchar(40), CAPACITY varchar(40),WARRENTY int(20),PRICE int(10));
+create table user(U_ID int(20) primary key,H_no varchar(15), U_NAME varchar(40),U_ADDRESS varchar(40));
+create table distributor(TIN int(20) primary key, D_NAME varchar(40),D_ADDRESS varchar(40), CONTACT bigint(12));
+CREATE TABLE sold(PV int(255),FOREIGN KEY(PV) REFERENCES panel(PV),TIN int(255),FOREIGN KEY(TIN) REFERENCES distributor(TIN),PRIMARY KEY(PV,TIN));
+CREATE TABLE purchased(PV int(255) ,FOREIGN KEY(PV) REFERENCES panel(PV),U_ID int(255) ,FOREIGN KEY(U_ID) REFERENCES user(U_ID),PRIMARY KEY(PV,U_ID));
+CREATE TABLE installed(DATE1 DATE,IPRICE INT,I_TYPE VARCHAR(255),PV int(255),FOREIGN KEY(PV) REFERENCES panel(PV),U_ID int(255),FOREIGN KEY(U_ID) REFERENCES user(U_ID),TIN int(255),FOREIGN KEY(TIN) REFERENCES distributor(TIN),PRIMARY KEY(PV,U_ID,TIN));
+
+
+insert into panel values(001,"Monocrytlline","1",15,15000);
+insert into panel values(002,"Monocrytlline","3",10,25000);
+insert into panel values(003,"Polycystalline","2",25,15000);
+insert into panel values(004,"Monocrytlline","5",7,30000);
+insert into panel values(005,"Polycystalline","6",9,15000);
+
+insert into distributor values(101,"Amit","Banglore",9546862364);
+insert into distributor values(102,"Aman","Mysore",6376862364);
+insert into distributor values(103,"Vishal","Pune",9546264364);
+insert into distributor values(104,"Raman","Delhi",9874862326);
+insert into distributor values(105,"Ravi","Hubbali",8246862371);
+
+
+
+insert into user values(10,"151","Prashant","Banglore");
+insert into user values(11,"152","Ganesh","Mumbai");
+insert into user values(12,"153","Akash","Hydrabad");
+insert into user values(13,"154","Mayank","Vijawada");
+insert into user values(14,"155","Vaibhav","Raipur");
+
+
+insert into sold values(1,101);
+insert into sold values(2,102);
+insert into sold values(3,103);
+insert into sold values(4,104);
+insert into sold values(5,105);
+
+
+insert into installed values("2020-1-10",40000,"Commercial",1,10,101);
+insert into installed values("2020-6-2",50000,"Commercial",2,11,102);
+insert into installed values("2021-1-2",20000,"non-Commercial",3,12,103);
+insert into installed values("2021-1-22",60000,"non-Commercial",4,13,104);
+insert into installed values("2019-12-7",70000,"Commercial",5,14,105);
+
+
+insert into purchased values(1,10);
+insert into purchased values(2,11);
+insert into purchased values(3,12);
+insert into purchased values(4,13);
+insert into purchased values(5,14);
+
+
+1. select d.D_NAME,count(d.TIN) from distributor d, installed i where i.TIN=d.TIN and i.I_TYPE="non-commercial" group by d.TIN order by max(d.TIN);
+
+
+2. select u.U_ID, u.H_no, p.CAPACITY from user u, installed i, panel p where u.U_ID=i.U_ID and p.PV=i.PV and p.CAPACITY=(select max(CAPACITY) from panel);
+
+
+3. select distinct u.H_no,u.U_ID, u.U_ADDRESS from user u, panel p, installed i where u.U_ID=i.U_ID and p.PV=i.PV and p.TYPE="Monocrytlline";
+
+
+4. select u.U_ADDRESS,sum(i.IPRICE)from user u,installed i,panel s where u.U_ID=i.U_ID and s.PV=i.PV and s.TYPE=" Polycystalline" and exists(select u.U_ADDRESS from user u,installed i,panel s where u.U_ID=i.U_ID and s.PV=i.PV and s.TYPE="Monocrytlline")group by u.U_ADDRESS;
+
+
+5. select d.*, p.*, i.DATE1 from distributor d, panel p, installed i where d.TIN=i.TIN and p.PV=i.PV and i.DATE1 in (select min(DATE1) from installed);
+
+
+6. select d.TYPE,avg(d.IPRICE) from ( select a.*, b.CAPACITY,c.U_ADDRESS, b.TYPE from installed a inner join panel b on a.PV = b.PV inner
+   join user c on c.U_ID=a.U_ID where a.I_TYPE="Commercial") as d GROUP by d.TYPE;
+
+
+
+
